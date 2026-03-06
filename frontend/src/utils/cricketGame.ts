@@ -146,6 +146,9 @@ function processHit(
       numberState.score += points
       player.totalScore += points
     }
+    
+    // Check if this should lock (defensive close)
+    checkIfShouldLock(gameState, number, playerIndex)
   }
 }
 
@@ -159,10 +162,13 @@ function checkIfShouldLock(
     return
   }
   
-  // Multi-player: lock only if ALL players have it open
-  const allPlayersHaveOpen = gameState.players.every(p => p.numbers[number].isOpen)
+  // Multi-player defensive close: if any opponent has this number open, lock it for everyone
+  const anyOpponentHasOpen = gameState.players.some((p, i) => 
+    i !== playerIndex && p.numbers[number].isOpen
+  )
   
-  if (allPlayersHaveOpen) {
+  if (anyOpponentHasOpen) {
+    // Lock for all players
     gameState.players.forEach(p => {
       p.numbers[number].isLocked = true
     })

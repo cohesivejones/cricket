@@ -211,6 +211,31 @@ describe('Cricket Game Logic', () => {
       expect(game.players[0].numbers[20].hits).toBe(2)
       expect(game.players[1].numbers[20].hits).toBe(0)
     })
+
+    it('should lock number when opponent opens it (defensive close)', () => {
+      let game = initializeCricketGame('test', ['Alice', 'Bob'])
+      
+      // Alice's turn: open 15
+      game = processDartThrow(game, { number: 15, hitType: 'single', hitsValue: 1 })
+      game = processDartThrow(game, { number: 15, hitType: 'single', hitsValue: 1 })
+      game = processDartThrow(game, { number: 15, hitType: 'single', hitsValue: 1 })
+      
+      expect(game.players[0].numbers[15].isOpen).toBe(true)
+      expect(game.players[0].numbers[15].isLocked).toBe(false)
+      expect(game.players[1].numbers[15].isOpen).toBe(false)
+      expect(game.players[1].numbers[15].isLocked).toBe(false)
+      
+      // Bob's turn: open 15 (defensive close)
+      game = processDartThrow(game, { number: 15, hitType: 'single', hitsValue: 1 })
+      game = processDartThrow(game, { number: 15, hitType: 'single', hitsValue: 1 })
+      game = processDartThrow(game, { number: 15, hitType: 'single', hitsValue: 1 })
+      
+      // Both players should now have 15 locked
+      expect(game.players[0].numbers[15].isOpen).toBe(true)
+      expect(game.players[0].numbers[15].isLocked).toBe(true)
+      expect(game.players[1].numbers[15].isOpen).toBe(true)
+      expect(game.players[1].numbers[15].isLocked).toBe(true)
+    })
   })
 
   describe('processDartThrow - Win Condition', () => {

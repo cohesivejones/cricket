@@ -16,10 +16,6 @@ vi.mock('../../hooks/useSession', () => ({
   useSession: vi.fn()
 }))
 
-vi.mock('../../components/Scoreboard', () => ({
-  default: () => <div>Scoreboard</div>
-}))
-
 import { useSession } from '../../hooks/useSession'
 
 describe('Session Page', () => {
@@ -84,7 +80,7 @@ describe('Session Page', () => {
     expect(screen.getByText(/test-session-123/i)).toBeInTheDocument()
   })
 
-  it('should display scoreboard when session loaded', () => {
+  it('should display cricket game board when session loaded with players', () => {
     const mockSession: SessionType = {
       sessionId: 'test-session-123',
       players: ['Alice', 'Bob'],
@@ -106,7 +102,11 @@ describe('Session Page', () => {
       </MemoryRouter>
     )
 
-    // Mock component renders just "Scoreboard" text (exact match to avoid h1 "Cricket Scoreboard")
-    expect(screen.getByText('Scoreboard')).toBeInTheDocument()
+    // Should show player names in the game
+    expect(screen.getByText('Alice')).toBeInTheDocument()
+    expect(screen.getByText('Bob')).toBeInTheDocument()
+    
+    // Should show New Game button
+    expect(screen.getByText(/New Game/i)).toBeInTheDocument()
   })
 })
