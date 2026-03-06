@@ -139,16 +139,26 @@ function processHit(
     numberState.hits = 3
     numberState.isOpen = true
     
-    // Score any excess hits
-    if (excessHits > 0) {
-      const points = getPointValue(number,
-        excessHits === 2 ? 'double' : 'single')
-      numberState.score += points
-      player.totalScore += points
-    }
-    
-    // Check if this should lock (defensive close)
+    // Check if this should lock (defensive close) BEFORE scoring excess
     checkIfShouldLock(gameState, number, playerIndex)
+    
+    // Score any excess hits ONLY if not locked
+    // Excess marks when OPENING score as SINGLES (base value only)
+    if (excessHits > 0 && !numberState.isLocked) {
+      let pointsPerExcessMark: number
+      
+      if (number === 25) {
+        // Bulls are special: inner bull = 50, outer bull = 25
+        pointsPerExcessMark = hitType === 'inner-bull' ? 50 : 25
+      } else {
+        // Regular numbers: excess marks score base value (the number itself)
+        pointsPerExcessMark = number
+      }
+      
+      const totalExcessPoints = pointsPerExcessMark * excessHits
+      numberState.score += totalExcessPoints
+      player.totalScore += totalExcessPoints
+    }
   }
 }
 

@@ -236,6 +236,73 @@ describe('Cricket Game Logic', () => {
       expect(game.players[1].numbers[15].isOpen).toBe(true)
       expect(game.players[1].numbers[15].isLocked).toBe(true)
     })
+
+    it('should NOT score excess marks when opponent has already closed the number', () => {
+      let game = initializeCricketGame('test', ['Alice', 'Bob'])
+      
+      // Alice's turn: close the bull
+      game = processDartThrow(game, { number: 25, hitType: 'inner-bull', hitsValue: 2 })
+      game = processDartThrow(game, { number: 25, hitType: 'outer-bull', hitsValue: 1 })
+      game = processDartThrow(game, { hitType: 'miss', hitsValue: 0 })
+      
+      expect(game.players[0].numbers[25].isOpen).toBe(true)
+      expect(game.players[0].totalScore).toBe(0) // No score yet
+      
+      // Bob's turn: hit 2 inner bulls (4 marks total - opens with 1 excess)
+      // Since Alice already closed, excess should NOT score
+      game = processDartThrow(game, { number: 25, hitType: 'inner-bull', hitsValue: 2 })
+      game = processDartThrow(game, { number: 25, hitType: 'inner-bull', hitsValue: 2 })
+      
+      expect(game.players[1].numbers[25].isOpen).toBe(true)
+      expect(game.players[1].numbers[25].isLocked).toBe(true) // Should lock
+      expect(game.players[1].numbers[25].score).toBe(0) // Excess should NOT score
+      expect(game.players[1].totalScore).toBe(0) // No points
+    })
+
+    it('should score excess marks when opponent has NOT closed the number', () => {
+      let game = initializeCricketGame('test', ['Alice'])
+      
+      // Alice hits 2 inner bulls (4 marks - opens with 1 excess)
+      // No opponent has closed, so excess should score 50 points
+      game = processDartThrow(game, { number: 25, hitType: 'inner-bull', hitsValue: 2 })
+      game = processDartThrow(game, { number: 25, hitType: 'inner-bull', hitsValue: 2 })
+      
+      expect(game.players[0].numbers[25].isOpen).toBe(true)
+      expect(game.players[0].numbers[25].score).toBe(50) // 1 excess mark = 50 points
+      expect(game.players[0].totalScore).toBe(50)
+    })
+
+    it('should count excess marks as SINGLE hits, not the throw multiplier', () => {
+      let game = initializeCricketGame('test', ['Alice'])
+      
+      // Alice hits double 20 twice (2 + 2 = 4 marks total)
+      // Opens at 3, has 1 excess mark
+      // Excess should score as SINGLE (20 points), not double (40 points)
+      game = processDartThrow(game, { number: 20, hitType: 'double', hitsValue: 2 })
+      game = processDartThrow(game, { number: 20, hitType: 'double', hitsValue: 2 })
+      
+      expect(game.players[0].numbers[20].isOpen).toBe(true)
+      expect(game.players[0].numbers[20].score).toBe(20) // 1 excess mark = single 20
+      expect(game.players[0].totalScore).toBe(20) // Not 40!
+    })
+
+    it('should score correctly for double 20 three times (60 points total)', () => {
+      let game = initializeCricketGame('test', ['Alice'])
+      
+      // 1st double 20: 2 marks (not open) = 0 points
+      game = processDartThrow(game, { number: 20, hitType: 'double', hitsValue: 2 })
+      expect(game.players[0].numbers[20].isOpen).toBe(false)
+      expect(game.players[0].totalScore).toBe(0)
+      
+      // 2nd double 20: 2 more marks = 4 total, opens at 3, 1 excess = 20 points
+      game = processDartThrow(game, { number: 20, hitType: 'double', hitsValue: 2 })
+      expect(game.players[0].numbers[20].isOpen).toBe(true)
+      expect(game.players[0].totalScore).toBe(20) // 1 excess mark as single
+      
+      // 3rd double 20: Already open, scores with multiplier = 40 points
+      game = processDartThrow(game, { number: 20, hitType: 'double', hitsValue: 2 })
+      expect(game.players[0].totalScore).toBe(60) // 20 + 40 = 60
+    })
   })
 
   describe('processDartThrow - Win Condition', () => {
