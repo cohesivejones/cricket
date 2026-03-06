@@ -132,4 +132,46 @@ describe('CricketScoreboard', () => {
     
     expect(screen.getByText(/Winner: Alice/i)).toBeInTheDocument()
   })
+
+  it('should show lock icon 🔒 for locked numbers without score', () => {
+    let game = initializeCricketGame('test', ['Alice', 'Bob'])
+    
+    // Alice opens 20
+    game = processDartThrow(game, { number: 20, hitType: 'triple', hitsValue: 3 })
+    game = processDartThrow(game, { hitType: 'miss', hitsValue: 0 })
+    game = processDartThrow(game, { hitType: 'miss', hitsValue: 0 })
+    
+    // Bob opens 20 (defensive close - both locked, neither scored)
+    game = processDartThrow(game, { number: 20, hitType: 'triple', hitsValue: 3 })
+    
+    const { container } = render(<CricketScoreboard game={game} />)
+    
+    // Both players should see lock icon (no score on locked number)
+    const cells = container.querySelectorAll('tbody td')
+    const lockCells = Array.from(cells).filter(cell => cell.textContent === '🔒')
+    expect(lockCells.length).toBe(2) // Both Alice and Bob show lock for 20
+  })
+
+  it('should show strikethrough score for locked numbers with score', () => {
+    let game = initializeCricketGame('test', ['Alice', 'Bob'])
+    
+    // Alice opens 20 and scores
+    game = processDartThrow(game, { number: 20, hitType: 'triple', hitsValue: 3 })
+    game = processDartThrow(game, { number: 20, hitType: 'single', hitsValue: 1 }) // Score 20
+    game = processDartThrow(game, { hitType: 'miss', hitsValue: 0 })
+    
+    // Bob opens 20 (defensive close - Alice has 20 points, now locked)
+    game = processDartThrow(game, { number: 20, hitType: 'triple', hitsValue: 3 })
+    
+    const { container } = render(<CricketScoreboard game={game} />)
+    
+    // Alice should show strikethrough 20
+    const cells = container.querySelectorAll('tbody td')
+    const aliceScoreCell = Array.from(cells).find(cell => {
+      const span = cell.querySelector('span')
+      return span && span.style.textDecoration === 'line-through'
+    })
+    expect(aliceScoreCell).toBeTruthy()
+    expect(aliceScoreCell?.textContent).toBe('20')
+  })
 })

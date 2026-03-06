@@ -80,21 +80,41 @@ export default function CricketScoreboard({ game }: CricketScoreboardProps) {
               }}>
                 {number === 25 ? 'Bull' : number}
               </td>
-              {game.players.map((player, index) => (
-                <td key={`${number}-${player.name}`} style={{
-                  padding: '0.75rem 1rem',
-                  textAlign: 'center',
-                  fontSize: '1.2rem',
-                  fontWeight: '500',
-                  fontFamily: 'monospace',
-                  backgroundColor: index === game.currentPlayerIndex 
-                    ? '#fff3cd' 
-                    : 'white',
-                  borderRight: index < game.players.length - 1 ? '1px solid #dee2e6' : 'none'
-                }}>
-                  {getDisplaySymbol(player.numbers[number])}
-                </td>
-              ))}
+              {game.players.map((player, index) => {
+                const numberState = player.numbers[number]
+                let displayContent: React.ReactNode
+                
+                if (numberState.isLocked && numberState.score > 0) {
+                  // Locked with score: show strikethrough score
+                  displayContent = (
+                    <span style={{ textDecoration: 'line-through', color: '#6c757d' }}>
+                      {numberState.score}
+                    </span>
+                  )
+                } else if (numberState.isLocked) {
+                  // Locked without score: show lock icon
+                  displayContent = '🔒'
+                } else {
+                  // Not locked: use regular symbol
+                  displayContent = getDisplaySymbol(numberState)
+                }
+                
+                return (
+                  <td key={`${number}-${player.name}`} style={{
+                    padding: '0.75rem 1rem',
+                    textAlign: 'center',
+                    fontSize: '1.2rem',
+                    fontWeight: '500',
+                    fontFamily: 'monospace',
+                    backgroundColor: index === game.currentPlayerIndex 
+                      ? '#fff3cd' 
+                      : 'white',
+                    borderRight: index < game.players.length - 1 ? '1px solid #dee2e6' : 'none'
+                  }}>
+                    {displayContent}
+                  </td>
+                )
+              })}
             </tr>
           ))}
           {/* Total Score Row */}
@@ -146,13 +166,19 @@ export default function CricketScoreboard({ game }: CricketScoreboardProps) {
           <code>/</code> = 1 hit
         </span>
         <span style={{ margin: '0 0.5rem' }}>
-          <code>X</code> = 2 hits or Locked
+          <code>X</code> = 2 hits
         </span>
         <span style={{ margin: '0 0.5rem' }}>
           <code>O</code> = Open (3 hits)
         </span>
         <span style={{ margin: '0 0.5rem' }}>
           <code>Number</code> = Points scored
+        </span>
+        <span style={{ margin: '0 0.5rem' }}>
+          <code>🔒</code> = Locked (no score)
+        </span>
+        <span style={{ margin: '0 0.5rem' }}>
+          <code style={{ textDecoration: 'line-through' }}>Number</code> = Locked with score
         </span>
       </div>
     </div>
