@@ -50,3 +50,20 @@ export async function updateSession(sessionId: string, data: SessionUpdateReques
 export function generateSessionId(): string {
   return crypto.randomUUID()
 }
+
+export async function updateGameState(
+  sessionId: string,
+  gameState: import('../types').CricketGameState
+): Promise<Session> {
+  const response = await fetch(`${API_BASE}/session/${sessionId}/game`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(gameState)
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to update game state')
+  }
+
+  return response.json()
+}

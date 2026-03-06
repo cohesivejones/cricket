@@ -10,7 +10,7 @@ export default {
     // CORS headers
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     }
 
@@ -51,7 +51,7 @@ export default {
       }
 
       // POST /api/session/:id - Update session
-      if (path.startsWith('/api/session/') && request.method === 'POST') {
+      if (path.startsWith('/api/session/') && !path.includes('/game') && request.method === 'POST') {
         const sessionId = path.split('/')[3]
         const body = await request.json()
 
@@ -62,6 +62,30 @@ export default {
         }
 
         return jsonResponse(session, 200, corsHeaders)
+      }
+
+      // PUT /api/session/:id/game - Update game state
+      if (path.match(/^\/api\/session\/[^/]+\/game$/) && request.method === 'PUT') {
+        const sessionId = path.split('/')[3]
+        const gameState = await request.json()
+
+        // Get existing session
+        const existingSession = await getSession(env.SESSIONS, sessionId)
+        if (!existingSession) {
+          return jsonResponse({ error: 'Session not found' }, 404, corsHeaders)
+        }
+
+        // Update session with game state
+        const updatedSession = {
+          ...existingSession,
+          cricketGame: gameState,
+          lastUpdated: new Date().toISOString()
+        }
+
+        // Save to KV with correct key prefix
+        await env.SESSIONS.put(`session:${sessionId}`, JSON.stringify(updatedSession))
+
+        return jsonResponse(updatedSession, 200, corsHeaders)
       }
 
       // 404 for unknown routes

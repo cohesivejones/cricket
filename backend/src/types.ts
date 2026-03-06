@@ -7,6 +7,7 @@ export interface Session {
   players: string[]
   scores: Record<string, number>
   metadata: Record<string, unknown>
+  cricketGame?: CricketGameState  // Add game state to session
   createdAt: string
   lastUpdated: string
 }
