@@ -1,0 +1,14 @@
+{
+  "name": "cricket-scoreboard",
+  "version": "1.0.0",
+  "description": "In-memory scoreboard app with React TypeScript and Cloudflare Workers",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "install": "cd frontend && npm install && cd ../backend && npm install",
+    "test": "cd frontend && npm test && cd ../backend && npm test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
