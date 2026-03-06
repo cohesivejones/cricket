@@ -1,21 +1,22 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import type { Env } from '../types'
 
 describe('Worker API', () => {
-  let mockEnv
-  let worker
+  let mockEnv: Env
+  let worker: any
 
   beforeEach(async () => {
     // Mock environment
-    const store = new Map()
+    const store = new Map<string, string>()
     mockEnv = {
       SESSIONS: {
-        get: async (key) => store.get(key) || null,
-        put: async (key, value) => store.set(key, value)
-      }
+        get: async (key: string) => store.get(key) || null,
+        put: async (key: string, value: string) => { store.set(key, value) }
+      } as KVNamespace
     }
 
     // Import worker after setting up mock
-    worker = await import('../index.js')
+    worker = await import('../index')
   })
 
   describe('POST /api/session', () => {
@@ -32,6 +33,25 @@ describe('Worker API', () => {
       expect(response.status).toBe(201)
       expect(data.sessionId).toBe('test-123')
       expect(data.players).toEqual([])
+    })
+
+    it('should create a session with initial players', async () => {
+      const request = new Request('http://localhost/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          sessionId: 'test-with-players', 
+          players: ['Alice', 'Bob'] 
+        })
+      })
+
+      const response = await worker.default.fetch(request, mockEnv)
+      const data = await response.json()
+
+      expect(response.status).toBe(201)
+      expect(data.sessionId).toBe('test-with-players')
+      expect(data.players).toEqual(['Alice', 'Bob'])
+      expect(data.scores).toEqual({ Alice: 0, Bob: 0 })
     })
 
     it('should return 400 if sessionId is missing', async () => {

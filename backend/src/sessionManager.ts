@@ -2,13 +2,25 @@
  * Session Manager - handles CRUD operations for game sessions
  */
 
-export async function createSession(kv, sessionId) {
+import type { Session } from './types'
+
+export async function createSession(
+  kv: KVNamespace,
+  sessionId: string,
+  players: string[] = []
+): Promise<Session> {
   const now = new Date().toISOString()
   
-  const session = {
+  // Initialize scores for all players to 0
+  const scores: Record<string, number> = {}
+  players.forEach(player => {
+    scores[player] = 0
+  })
+  
+  const session: Session = {
     sessionId,
-    players: [],
-    scores: {},
+    players,
+    scores,
     metadata: {},
     createdAt: now,
     lastUpdated: now
@@ -18,7 +30,10 @@ export async function createSession(kv, sessionId) {
   return session
 }
 
-export async function getSession(kv, sessionId) {
+export async function getSession(
+  kv: KVNamespace,
+  sessionId: string
+): Promise<Session | null> {
   const data = await kv.get(`session:${sessionId}`)
   
   if (!data) {
@@ -28,14 +43,18 @@ export async function getSession(kv, sessionId) {
   return JSON.parse(data)
 }
 
-export async function updateSession(kv, sessionId, updates) {
+export async function updateSession(
+  kv: KVNamespace,
+  sessionId: string,
+  updates: Partial<Session>
+): Promise<Session | null> {
   const existing = await getSession(kv, sessionId)
   
   if (!existing) {
     return null
   }
 
-  const updated = {
+  const updated: Session = {
     ...existing,
     ...updates,
     lastUpdated: new Date().toISOString()

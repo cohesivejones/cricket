@@ -1,4 +1,4 @@
-import { useState, FormEvent, ChangeEvent } from 'react'
+import { useState } from 'react'
 import { updateSession } from '../utils/api'
 import type { Session } from '../types'
 
@@ -7,30 +7,7 @@ interface ScoreboardProps {
 }
 
 export default function Scoreboard({ session }: ScoreboardProps) {
-  const [playerName, setPlayerName] = useState('')
   const [updating, setUpdating] = useState(false)
-
-  const handleAddPlayer = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!playerName.trim()) return
-
-    setUpdating(true)
-    try {
-      const newPlayers = [...session.players, playerName]
-      const newScores = { ...session.scores, [playerName]: 0 }
-      
-      await updateSession(session.sessionId, {
-        players: newPlayers,
-        scores: newScores
-      })
-      
-      setPlayerName('')
-    } catch (error) {
-      console.error('Failed to add player:', error)
-    } finally {
-      setUpdating(false)
-    }
-  }
 
   const handleUpdateScore = async (player: string, delta: number) => {
     setUpdating(true)
@@ -46,51 +23,13 @@ export default function Scoreboard({ session }: ScoreboardProps) {
     }
   }
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPlayerName(e.target.value)
-  }
-
   return (
     <div>
       <h2>Scoreboard</h2>
       
-      {/* Add Player Form */}
-      <form onSubmit={handleAddPlayer} style={{ marginBottom: '2rem' }}>
-        <input
-          type="text"
-          value={playerName}
-          onChange={handleInputChange}
-          placeholder="Enter player name"
-          disabled={updating}
-          style={{
-            padding: '0.5rem',
-            fontSize: '1rem',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            marginRight: '0.5rem'
-          }}
-        />
-        <button
-          type="submit"
-          disabled={updating || !playerName.trim()}
-          style={{
-            padding: '0.5rem 1rem',
-            fontSize: '1rem',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: updating ? 'not-allowed' : 'pointer',
-            opacity: updating || !playerName.trim() ? 0.6 : 1
-          }}
-        >
-          Add Player
-        </button>
-      </form>
-
       {/* Scores Table */}
       {session.players.length === 0 ? (
-        <p style={{ color: '#666' }}>No players yet. Add a player to get started!</p>
+        <p style={{ color: '#666' }}>No players in this game.</p>
       ) : (
         <table style={{
           width: '100%',

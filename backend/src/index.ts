@@ -2,10 +2,11 @@
  * Cloudflare Worker - API endpoints for scoreboard sessions
  */
 
-import { createSession, getSession, updateSession } from './sessionManager.js'
+import { createSession, getSession, updateSession } from './sessionManager'
+import type { Env } from './types'
 
 export default {
-  async fetch(request, env) {
+  async fetch(request: Request, env: Env): Promise<Response> {
     // CORS headers
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
@@ -27,13 +28,13 @@ export default {
     try {
       // POST /api/session - Create new session
       if (path === '/api/session' && request.method === 'POST') {
-        const body = await request.json()
+        const body = await request.json() as { sessionId?: string; players?: string[] }
         
         if (!body.sessionId) {
           return jsonResponse({ error: 'sessionId is required' }, 400, corsHeaders)
         }
 
-        const session = await createSession(env.SESSIONS, body.sessionId)
+        const session = await createSession(env.SESSIONS, body.sessionId, body.players)
         return jsonResponse(session, 201, corsHeaders)
       }
 
@@ -73,7 +74,7 @@ export default {
   }
 }
 
-function jsonResponse(data, status = 200, additionalHeaders = {}) {
+function jsonResponse(data: unknown, status = 200, additionalHeaders: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {

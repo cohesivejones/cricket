@@ -6,11 +6,11 @@ import type { Session, SessionUpdateRequest } from '../types'
 
 const API_BASE = '/api'
 
-export async function createSession(sessionId: string): Promise<Session> {
+export async function createSession(sessionId: string, players?: string[]): Promise<Session> {
   const response = await fetch(`${API_BASE}/session`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId })
+    body: JSON.stringify({ sessionId, players })
   })
 
   if (!response.ok) {
