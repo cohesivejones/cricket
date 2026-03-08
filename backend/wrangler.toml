@@ -5,8 +5,7 @@ compatibility_date = "2024-01-01"
 # KV Namespace for session storage
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "placeholder"
-preview_id = "placeholder"
+id = "3466eafd42b74cfbb092fce2a3e6f85a"
 
 [build]
 command = ""

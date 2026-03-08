@@ -199,18 +199,13 @@ Update game state (persists Cricket game)
 
 ## 🌐 Deployment
 
-### Backend (Cloudflare Workers)
+### Backend (Cloudflare Workers) ✅ DEPLOYED
 
-1. **Create KV namespace:**
+**Live URL:** `https://cricket-scoreboard-api.my-cricket-app.workers.dev`
+
+The backend is already deployed! To update:
 ```bash
 cd backend
-npx wrangler kv:namespace create "SESSIONS"
-```
-
-2. **Update `wrangler.toml` with the KV namespace ID**
-
-3. **Deploy:**
-```bash
 npm run deploy
 ```
 
@@ -227,13 +222,24 @@ npm run build
    - Connect repository to Cloudflare Pages
    - Build command: `cd frontend && npm install && npm run build`
    - Build output directory: `frontend/dist`
-   - Set environment variable: `VITE_API_BASE=https://your-worker.workers.dev`
+   - **Environment variable**: 
+     - Name: `VITE_API_BASE`
+     - Value: `https://cricket-scoreboard-api.my-cricket-app.workers.dev`
 
 **OR use Wrangler:**
 ```bash
 cd frontend
-npx wrangler pages deploy dist
+export VITE_API_BASE=https://cricket-scoreboard-api.my-cricket-app.workers.dev
+npm run build
+npx wrangler pages deploy dist --project-name cricket-scoreboard
 ```
+
+### Custom Domain (Optional)
+
+To use `cricket.drnatejones.com` as your API domain, see [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions on:
+- Configuring custom routes in wrangler.toml
+- Setting up DNS records
+- Using your own domain instead of workers.dev
 
 ## 🆓 Cloudflare Free Tier
 

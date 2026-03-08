@@ -4,7 +4,8 @@
 
 import type { Session, SessionUpdateRequest } from '../types'
 
-const API_BASE = '/api'
+// Use environment variable for production, fall back to proxy in development
+const API_BASE = import.meta.env.VITE_API_BASE || '/api'
 
 export async function createSession(sessionId: string, players?: string[]): Promise<Session> {
   const response = await fetch(`${API_BASE}/session`, {
