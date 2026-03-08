@@ -16,6 +16,10 @@ vi.mock('../../hooks/useSession', () => ({
   useSession: vi.fn()
 }))
 
+vi.mock('../../utils/api', () => ({
+  updateGameState: vi.fn().mockResolvedValue({})
+}))
+
 import { useSession } from '../../hooks/useSession'
 
 describe('Session Page', () => {
