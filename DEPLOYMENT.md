@@ -1,33 +1,27 @@
 # Deployment Guide - Cloudflare
 
-This guide walks you through deploying the Cricket Scoreboard app to Cloudflare (Workers + Pages).
+This guide walks you through deploying the Cricket Scoreboard app to Cloudflare Workers (backend) and Cloudflare Pages (frontend).
 
 ## Prerequisites
 
 1. **Cloudflare Account**: Sign up at https://cloudflare.com (free tier is fine)
-2. **Wrangler CLI**: Already installed in the project
-3. **GitHub Account**: For Cloudflare Pages (or use direct upload)
+2. **GitHub Account**: Your code should be pushed to GitHub
+3. **Wrangler CLI**: Already installed in the project
 
-## Step 1: Set Up Cloudflare Account
+## Part 1: Deploy Backend (Cloudflare Workers)
 
-1. Sign up/login at https://dash.cloudflare.com
-2. Note your **Account ID** from the dashboard
-
-## Step 2: Authenticate Wrangler
+### Step 1: Authenticate Wrangler
 
 ```bash
 cd backend
 npx wrangler login
 ```
 
-This will open a browser to authorize Wrangler with your Cloudflare account.
+This opens a browser to authorize Wrangler with your Cloudflare account.
 
-## Step 3: Create KV Namespace
+### Step 2: Create KV Namespace
 
 ```bash
-cd backend
-
-# Create production KV namespace
 npx wrangler kv:namespace create "SESSIONS"
 ```
 
@@ -35,86 +29,50 @@ You'll get output like:
 ```
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "abc123def456...m "
+id = "3466eafd42b74cfbb092fce2a3e6f85a"
 ```
 
 **Copy the `id` value!**
 
-## Step 4: Update wrangler.toml
+### Step 3: Update wrangler.toml
 
-Edit `backend/wrangler.toml`:
+Edit `backend/wrangler.toml` and add your KV namespace ID:
 
 ```toml
-name = "cricket-scoreboard-api"
-main = "src/index.ts"
-compatibility_date = "2024-01-01"
-
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "YOUR_KV_NAMESPACE_ID_HERE"  # ← Paste the ID from Step 3
-
-[build]
-command = "npm run build"
+id = "YOUR_KV_NAMESPACE_ID_HERE"  # ← Paste the ID from Step 2
 ```
 
-## Step 5: Deploy Backend (Cloudflare Workers)
+### Step 4: Register workers.dev Subdomain
 
 ```bash
-cd backend
 npm run deploy
 ```
 
-You'll see output like:
+When prompted: `Would you like to register a workers.dev subdomain now?`
+- Type `yes`
+- Choose a subdomain name (e.g., `my-cricket-app`)
+
+### Step 5: Backend Deployed! ✅
+
+You'll see:
 ```
 ✨ Success! Uploaded cricket-scoreboard-api
-🌎 https://cricket-scoreboard-api.YOUR-SUBDOMAIN.workers.dev
+🌎 https://cricket-scoreboard-api.MY-SUBDOMAIN.workers.dev
 ```
 
-**Copy this URL!** You'll need it for the frontend.
+**Example:** `https://cricket-scoreboard-api.my-cricket-app.workers.dev`
 
-**Test the backend:**
+**Test it:**
 ```bash
-curl https://cricket-scoreboard-api.YOUR-SUBDOMAIN.workers.dev/api/session
-# Should return 404 (expected - need to POST first)
+curl https://cricket-scoreboard-api.MY-SUBDOMAIN.workers.dev/api/session
+# Should return: {"error":"Not found"}  ← This is correct!
 ```
 
-## Step 6: Configure Frontend for Production
+## Part 2: Deploy Frontend (Cloudflare Pages)
 
-Edit `frontend/vite.config.js` and add the base URL:
-
-```javascript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8787',
-        changeOrigin: true
-      }
-    }
-  },
-  // Add this for production
-  define: {
-    'import.meta.env.VITE_API_BASE': JSON.stringify(
-      process.env.VITE_API_BASE || ''
-    )
-  }
-})
-```
-
-Edit `frontend/src/utils/api.ts`:
-
-```typescript
-// Use environment variable for API base URL
-const API_BASE = import.meta.env.VITE_API_BASE || '/api'
-```
-
-## Step 7: Deploy Frontend - Option A (GitHub + Cloudflare Pages)
-
-### 7a. Push to GitHub
+### Step 6: Push Code to GitHub
 
 ```bash
 git add .
@@ -122,170 +80,135 @@ git commit -m "Ready for deployment"
 git push origin main
 ```
 
-### 7b. Connect to Cloudflare Pages
+### Step 7: Connect to Cloudflare Pages
 
 1. Go to https://dash.cloudflare.com
-2. Click "Workers & Pages" in the sidebar
-3. Click "Create application" → "Pages" → "Connect to Git"
+2. Click **"Workers & Pages"** in the sidebar
+3. Click **"Create application"** → **"Pages"** tab → **"Connect to Git"**
 4. Select your GitHub repository
-5. Configure build settings:
+5. Click **"Begin setup"**
 
-**Build Settings:**
+### Step 8: Configure Build Settings
+
+**Project name:** `cricket-scoreboard` (or any name)
+
+**Production branch:** `main` (or `master`)
+
+**Build settings:**
+- **Framework preset**: None (or Vite if available)
 - **Build command**: `cd frontend && npm install && npm run build`
-- **Build output directory**: `frontend/dist`
-- **Root directory**: `/` (leave as project root)
+- **Build output directory**: `frontend/dist` ← **Important!**
 
-**Environment Variables:**
-- Click "Add variable"
-- Name: `VITE_API_BASE`
-- Value: `https://cricket-scoreboard-api.YOUR-SUBDOMAIN.workers.dev`
-  (Use the URL from Step 5)
+### Step 9: Add Environment Variable
 
-6. Click "Save and Deploy"
+Click **"Add variable"** and add:
 
-### 7c. Wait for Deployment
+- **Variable name**: `VITE_API_BASE`
+- **Variable value**: `https://cricket-scoreboard-api.MY-SUBDOMAIN.workers.dev/api`
 
-Cloudflare will build and deploy your app. First deployment takes 2-5 minutes.
+⚠️ **Important:** Include `/api` at the end! 
 
-You'll get a URL like:
+**Example:** `https://cricket-scoreboard-api.my-cricket-app.workers.dev/api`
+
+### Step 10: Deploy
+
+Click **"Save and Deploy"**
+
+Deployment takes 2-5 minutes. You'll get a URL like:
 ```
-https://cricket-scoreboard-xyz.pages.dev
-```
-
-## Step 7: Deploy Frontend - Option B (Direct Upload)
-
-If you don't want to use GitHub:
-
-```bash
-cd frontend
-
-# Build the app
-npm run build
-
-# Set API URL as environment variable
-export VITE_API_BASE=https://cricket-scoreboard-api.YOUR-SUBDOMAIN.workers.dev
-
-# Rebuild with production API URL
-npm run build
-
-# Deploy directly
-npx wrangler pages deploy dist --project-name cricket-scoreboard
+https://cricket-scoreboard-ABC.pages.dev
 ```
 
-## Step 8: Test Your Deployment
+## Part 3: Verify Deployment
 
-1. Visit your Cloudflare Pages URL
-2. Click "New Game"
-3. Add players and start playing
-4. Copy the URL and open in a new tab/browser
-5. Both tabs should sync in real-time!
+### ✅ Checklist:
 
-## Verification Checklist
-
-✅ Backend deployed and accessible
-```bash
-curl https://cricket-scoreboard-api.YOUR-SUBDOMAIN.workers.dev/api/session
-# Should return JSON error (expected)
-```
-
-✅ Frontend deployed and loading
-- Visit your Pages URL
-- Should see landing page
-
-✅ Frontend can connect to backend
-- Create a game
-- Check browser console (F12) for API errors
-- Should see no CORS errors
-
-✅ Multi-tab sync works
-- Open game in 2 tabs
-- Changes in one appear in the other (within 3 seconds)
-
-✅ Refresh persistence works
-- Play some darts
-- Refresh page
-- Game state should persist
+1. **Visit your Pages URL** (e.g., `https://cricket-scoreboard-ABC.pages.dev`)
+2. **Add players** on the landing page
+3. **Click "Create Game"**
+4. **Check browser console** (F12) - should be no errors
+5. **Play some darts** - game should work!
+6. **Refresh page** - game state should persist
+7. **Open in new tab** - should see same game
+8. **Share URL** with friend - they should see same game
 
 ## Troubleshooting
 
-### CORS Errors
+### Error: POST .../api/session 404
 
-If you see CORS errors in console:
+**Symptom:** Console shows `POST https://...workers.dev//session 404`  
+**Problem:** Missing `/api` in VITE_API_BASE or double slashes
 
-1. Check that `VITE_API_BASE` is set correctly in Cloudflare Pages env vars
-2. Verify backend has CORS headers (already configured in `backend/src/index.ts`)
-3. Redeploy backend: `cd backend && npm run deploy`
+**Fix:**
+1. Go to Cloudflare Pages dashboard
+2. Settings → Environment variables
+3. Update `VITE_API_BASE` to include `/api`:
+   ```
+   https://cricket-scoreboard-api.MY-SUBDOMAIN.workers.dev/api
+   ```
+4. Deployments → Retry deployment
 
-### "Failed to fetch" Errors
+### Error: CORS
 
-1. Verify backend URL is correct
-2. Test backend directly with curl
-3. Check KV namespace is bound correctly in wrangler.toml
-4. Check browser console for actual error
+**Symptom:** CORS policy errors in console
+
+**Fix:**
+1. Verify `VITE_API_BASE` is set correctly
+2. Redeploy backend: `cd backend && npm run deploy`
+3. Clear browser cache and retry
 
 ### Games Not Persisting
 
-1. Verify KV namespace is created and bound
-2. Check wrangler.toml has correct KV namespace ID
-3. Redeploy backend
-4. Clear browser cache and try again
+**Fix:**
+1. Verify KV namespace is bound in `wrangler.toml`
+2. Redeploy backend
+3. Clear browser cache
 
-### Build Failures
+### Build Output Directory Error
 
-If frontend build fails on Cloudflare Pages:
+**Symptom:** `Output directory "dist" not found`
 
-1. Check build command is: `cd frontend && npm install && npm run build`
-2. Check output directory is: `frontend/dist`
-3. Check that all dependencies are in package.json (not devDependencies for required runtime deps)
-
-## Custom Domain (Optional)
-
-### For Frontend (Pages)
-
-1. In Cloudflare Pages dashboard
-2. Go to "Custom domains"
-3. Click "Set up a custom domain"
-4. Enter your domain (must be on Cloudflare DNS)
-5. Follow prompts to add DNS records
-
-### For Backend (Workers)
-
-1. In Workers dashboard
-2. Go to your worker → "Triggers"
-3. Click "Add Custom Domain"
-4. Enter subdomain (e.g., `api.yourdomain.com`)
-5. Update frontend `VITE_API_BASE` to use new domain
-6. Redeploy frontend
+**Fix:**
+1. Cloudflare Pages Settings → Builds & deployments
+2. Change **Build output directory** to: `frontend/dist`
+3. Save and retry deployment
 
 ## Updating Your Deployment
 
-### Backend Changes
+### Update Backend
 
 ```bash
 cd backend
 npm run deploy
 ```
 
-### Frontend Changes
+### Update Frontend
 
-**If using GitHub:**
+Just push to GitHub - Cloudflare auto-deploys:
 ```bash
 git add .
 git commit -m "Update frontend"
 git push origin main
-# Cloudflare auto-deploys from GitHub
 ```
 
-**If using direct upload:**
-```bash
-cd frontend
-npm run build
-npx wrangler pages deploy dist
-```
+## Custom Domain (Optional)
+
+### For Backend (Workers)
+
+1. Workers dashboard → Your worker → Triggers
+2. Click "Add Custom Domain"
+3. Enter subdomain (e.g., `cricket.yourdomain.com`)
+4. Update `VITE_API_BASE` in Pages env vars to new domain
+5. Redeploy frontend
+
+### For Frontend (Pages)
+
+1. Pages dashboard → Custom domains
+2. Click "Set up a custom domain"
+3. Enter domain (must be on Cloudflare DNS)
+4. Follow DNS setup prompts
 
 ## Monitoring
-
-### Check Logs
 
 **Backend logs:**
 ```bash
@@ -297,37 +220,32 @@ npx wrangler tail
 - Browser console (F12)
 - Cloudflare Pages dashboard → Analytics
 
-### Analytics
+## Cost (Free Tier)
 
-- **Workers**: Dashboard → Workers & Pages → Analytics
-- **Pages**: Dashboard → Workers & Pages → Your Project → Analytics
-
-## Cost Estimate (Free Tier)
-
-With Cloudflare Free Tier:
+Cloudflare Free Tier limits:
 - **Workers**: 100,000 requests/day
-- **KV**: 100,000 reads/day, 1,000 writes/day  
+- **KV**: 100,000 reads/day, 1,000 writes/day
 - **Pages**: Unlimited bandwidth
 
-**Your Usage:**
-- Each active user = ~28,800 API calls/day (3s polling)
-- Supports 3+ concurrent users easily
+Your usage:
+- Each user = ~28,800 API calls/day (3s polling)
+- Supports **3+ concurrent users** easily
 - Hundreds of games stored
 
-You'll stay well within free tier limits! 🎉
+**You'll stay within free tier!** 🎉
 
-## Support
+## Example Configuration
 
-- Cloudflare Docs: https://developers.cloudflare.com
-- Workers: https://developers.cloudflare.com/workers
-- Pages: https://developers.cloudflare.com/pages
-- KV: https://developers.cloudflare.com/kv
+**Your Actual URLs:**
+- Backend: `https://cricket-scoreboard-api.my-cricket-app.workers.dev`
+- Frontend: `https://cricket-57v.pages.dev`
+- VITE_API_BASE: `https://cricket-scoreboard-api.my-cricket-app.workers.dev/api`
 
 ## Next Steps
 
 1. ✅ Backend deployed
-2. ✅ Frontend deployed  
-3. ✅ Test multiplayer functionality
-4. 🎮 Share with friends and play!
+2. ✅ Frontend deployed
+3. ✅ Test the game
+4. 🎮 Share with friends!
 
 Enjoy your Cricket Darts Scoreboard! 🎯
