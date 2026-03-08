@@ -6,6 +6,7 @@ import DartInput from '../components/DartInput'
 import { initializeCricketGame, processDartThrow } from '../utils/cricketGame'
 import { updateGameState } from '../utils/api'
 import type { CricketGameState, DartThrow } from '../types'
+import styles from './Session.module.css'
 
 export default function Session() {
   const { id } = useParams<{ id: string }>()
@@ -30,13 +31,7 @@ export default function Session() {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontFamily: 'system-ui, -apple-system, sans-serif'
-      }}>
+      <div className={styles.loadingContainer}>
         <div>Loading session...</div>
       </div>
     )
@@ -44,17 +39,10 @@ export default function Session() {
 
   if (error) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontFamily: 'system-ui, -apple-system, sans-serif'
-      }}>
-        <h2 style={{ color: '#dc3545' }}>Error</h2>
+      <div className={styles.errorContainer}>
+        <h2>Error</h2>
         <p>{error}</p>
-        <a href="/" style={{ marginTop: '1rem', color: '#007bff' }}>Go back to home</a>
+        <a href="/">Go back to home</a>
       </div>
     )
   }
@@ -80,41 +68,18 @@ export default function Session() {
   }
 
   return (
-    <div style={{
-      padding: '2rem',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      maxWidth: '1400px',
-      margin: '0 auto'
-    }}>
+    <div className={styles.container}>
       {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
+      <div className={styles.header}>
         <h1>🎯 Cricket Darts</h1>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '1rem',
-          marginTop: '1rem'
-        }}>
-          <span style={{ color: '#666' }}>Session ID:</span>
-          <code style={{ 
-            padding: '0.5rem', 
-            backgroundColor: '#f5f5f5', 
-            borderRadius: '4px',
-            fontSize: '0.9rem'
-          }}>
+        <div className={styles.sessionInfo}>
+          <span className={styles.sessionIdLabel}>Session ID:</span>
+          <code className={styles.sessionIdCode}>
             {session.sessionId}
           </code>
           <button
             onClick={() => navigator.clipboard.writeText(window.location.href)}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '0.9rem'
-            }}
+            className={styles.copyLinkBtn}
           >
             📋 Copy Link
           </button>
@@ -125,36 +90,24 @@ export default function Session() {
       {cricketGame && (
         <div>
           {/* New Game Button */}
-          <div style={{ marginBottom: '1rem', textAlign: 'right' }}>
+          <div className={styles.newGameContainer}>
             <button
               onClick={handleNewGame}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#6c757d',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.9rem'
-              }}
+              className={styles.newGameBtn}
             >
               🔄 New Game
             </button>
           </div>
 
           {/* Game Board */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr',
-            gap: '2rem'
-          }}>
+          <div className={styles.gameLayout}>
             {/* Scoreboard */}
-            <div>
+            <div className={styles.scoreboardSection}>
               <CricketScoreboard game={cricketGame} />
             </div>
 
             {/* Dart Input */}
-            <div>
+            <div className={styles.inputSection}>
               <DartInput 
                 onDartThrow={handleDartThrow} 
                 disabled={cricketGame.gameEnded}

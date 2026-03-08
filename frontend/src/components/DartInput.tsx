@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { DartThrow, CricketNumber, HitType } from '../types'
+import styles from './DartInput.module.css'
 
 interface DartInputProps {
   onDartThrow: (dart: DartThrow) => void
@@ -40,51 +41,30 @@ export default function DartInput({ onDartThrow, disabled }: DartInputProps) {
     })
   }
 
-  const buttonStyle = (isSelected: boolean = false) => ({
-    padding: '1rem 1.5rem',
-    margin: '0.25rem',
-    backgroundColor: isSelected ? '#ffc107' : '#007bff',
-    color: isSelected ? '#000' : 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    fontSize: '1rem',
-    fontWeight: 'bold',
-    opacity: disabled ? 0.5 : 1,
-    transition: 'all 0.2s',
-    minWidth: '60px'
-  })
-
   return (
-    <div style={{ width: '100%' }}>
+    <div className={styles.container}>
       {/* Multiplier Selection */}
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '1rem',
-        borderRadius: '8px',
-        marginBottom: '1rem',
-        border: '2px solid #dee2e6'
-      }}>
-        <h3 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>Select Multiplier</h3>
-        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+      <div className={styles.section}>
+        <h3 className={styles.sectionTitle}>Select Multiplier</h3>
+        <div className={styles.buttonGroup}>
           <button
             onClick={() => setSelectedMultiplier('single')}
             disabled={disabled}
-            style={buttonStyle(selectedMultiplier === 'single')}
+            className={`${styles.buttonSingle} ${selectedMultiplier === 'single' ? styles.buttonSelected : ''}`}
           >
             Single
           </button>
           <button
             onClick={() => setSelectedMultiplier('double')}
             disabled={disabled}
-            style={buttonStyle(selectedMultiplier === 'double')}
+            className={`${styles.buttonDouble} ${selectedMultiplier === 'double' ? styles.buttonSelected : ''}`}
           >
             Double
           </button>
           <button
             onClick={() => setSelectedMultiplier('triple')}
             disabled={disabled}
-            style={buttonStyle(selectedMultiplier === 'triple')}
+            className={`${styles.buttonTriple} ${selectedMultiplier === 'triple' ? styles.buttonSelected : ''}`}
           >
             Triple
           </button>
@@ -92,26 +72,15 @@ export default function DartInput({ onDartThrow, disabled }: DartInputProps) {
       </div>
 
       {/* Number Selection */}
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '1rem',
-        borderRadius: '8px',
-        marginBottom: '1rem',
-        border: '2px solid #dee2e6'
-      }}>
-        <h3 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>Select Number</h3>
-        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+      <div className={styles.section}>
+        <h3 className={styles.sectionTitle}>Select Number</h3>
+        <div className={styles.buttonGroup}>
           {CRICKET_NUMBERS.map(num => (
             <button
               key={num}
               onClick={() => handleNumberClick(num)}
               disabled={disabled}
-              style={{
-                ...buttonStyle(),
-                backgroundColor: '#28a745',
-                fontSize: '1.2rem',
-                minWidth: '70px'
-              }}
+              className={styles.buttonNumber}
             >
               {num}
             </button>
@@ -120,32 +89,20 @@ export default function DartInput({ onDartThrow, disabled }: DartInputProps) {
       </div>
 
       {/* Bulls */}
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '1rem',
-        borderRadius: '8px',
-        marginBottom: '1rem',
-        border: '2px solid #dee2e6'
-      }}>
-        <h3 style={{ margin: '0 0 1rem 0', textAlign: 'center' }}>Bulls</h3>
-        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+      <div className={styles.section}>
+        <h3 className={styles.sectionTitle}>Bulls</h3>
+        <div className={styles.buttonGroup}>
           <button
             onClick={() => handleBullClick('outer')}
             disabled={disabled}
-            style={{
-              ...buttonStyle(),
-              backgroundColor: '#17a2b8'
-            }}
+            className={styles.buttonOuterBull}
           >
             Outer Bull (25)
           </button>
           <button
             onClick={() => handleBullClick('inner')}
             disabled={disabled}
-            style={{
-              ...buttonStyle(),
-              backgroundColor: '#6f42c1'
-            }}
+            className={styles.buttonInnerBull}
           >
             Inner Bull (50)
           </button>
@@ -153,21 +110,12 @@ export default function DartInput({ onDartThrow, disabled }: DartInputProps) {
       </div>
 
       {/* Miss Button */}
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '1rem',
-        borderRadius: '8px',
-        border: '2px solid #dee2e6'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <div className={styles.section}>
+        <div className={styles.buttonGroup}>
           <button
             onClick={handleMiss}
             disabled={disabled}
-            style={{
-              ...buttonStyle(),
-              backgroundColor: '#dc3545',
-              minWidth: '150px'
-            }}
+            className={styles.buttonMiss}
           >
             Miss
           </button>

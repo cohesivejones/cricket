@@ -1,0 +1,167 @@
+.container {
+  width: 100%;
+}
+
+.section {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 2px solid #dee2e6;
+}
+
+.sectionTitle {
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.button {
+  padding: 1rem 1.5rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  opacity: 1;
+  transition: all 0.2s;
+  min-width: 60px;
+  min-height: 44px; /* Apple's minimum touch target size */
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+.buttonSelected {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.buttonSingle {
+  composes: button;
+}
+
+.buttonDouble {
+  composes: button;
+}
+
+.buttonTriple {
+  composes: button;
+}
+
+.buttonNumber {
+  composes: button;
+  background-color: #28a745;
+  font-size: 1.2rem;
+  min-width: 70px;
+}
+
+.buttonOuterBull {
+  composes: button;
+  background-color: #17a2b8;
+}
+
+.buttonInnerBull {
+  composes: button;
+  background-color: #6f42c1;
+}
+
+.buttonMiss {
+  composes: button;
+  background-color: #dc3545;
+  min-width: 150px;
+}
+
+/* Tablet breakpoint */
+@media (max-width: 992px) {
+  .button {
+    padding: 0.9rem 1.3rem;
+    font-size: 0.95rem;
+  }
+
+  .buttonNumber {
+    font-size: 1.1rem;
+    min-width: 65px;
+  }
+}
+
+/* Mobile breakpoint */
+@media (max-width: 768px) {
+  .section {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .sectionTitle {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .button {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    min-width: 50px;
+  }
+
+  .buttonNumber {
+    font-size: 1rem;
+    min-width: 60px;
+    padding: 0.75rem 1rem;
+  }
+
+  .buttonMiss {
+    min-width: 120px;
+  }
+}
+
+/* Small mobile breakpoint */
+@media (max-width: 480px) {
+  .section {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .buttonGroup {
+    gap: 0.35rem;
+  }
+
+  .button {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    min-width: 44px; /* Maintain touch target */
+  }
+
+  .buttonNumber {
+    font-size: 0.95rem;
+    min-width: 55px;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .buttonMiss {
+    min-width: 100px;
+  }
+}
