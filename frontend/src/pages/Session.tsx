@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'wouter'
-import { useSession } from '../hooks/useSession'
+import { useSessionStream } from '../hooks/useSessionStream'
 import CricketScoreboard from '../components/CricketScoreboard'
 import DartInput from '../components/DartInput'
 import { initializeCricketGame, processDartThrow } from '../utils/cricketGame'
@@ -10,7 +10,7 @@ import styles from './Session.module.css'
 
 export default function Session() {
   const { id } = useParams<{ id: string }>()
-  const { session, loading, error } = useSession(id || '')
+  const { session, loading, error } = useSessionStream(id || '')
   const [cricketGame, setCricketGame] = useState<CricketGameState | null>(null)
 
   // Initialize or sync game when session loads/updates

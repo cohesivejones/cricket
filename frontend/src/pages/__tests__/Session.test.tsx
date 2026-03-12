@@ -12,15 +12,15 @@ vi.mock('wouter', async () => {
   }
 })
 
-vi.mock('../../hooks/useSession', () => ({
-  useSession: vi.fn()
+vi.mock('../../hooks/useSessionStream', () => ({
+  useSessionStream: vi.fn()
 }))
 
 vi.mock('../../utils/api', () => ({
   updateGameState: vi.fn().mockResolvedValue({})
 }))
 
-import { useSession } from '../../hooks/useSession'
+import { useSessionStream } from '../../hooks/useSessionStream'
 
 describe('Session Page', () => {
   beforeEach(() => {
@@ -28,7 +28,7 @@ describe('Session Page', () => {
   })
 
   it('should show loading state', () => {
-    (useSession as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useSessionStream as ReturnType<typeof vi.fn>).mockReturnValue({
       session: null,
       loading: true,
       error: null
@@ -44,7 +44,7 @@ describe('Session Page', () => {
   })
 
   it('should show error state', () => {
-    (useSession as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useSessionStream as ReturnType<typeof vi.fn>).mockReturnValue({
       session: null,
       loading: false,
       error: 'Session not found'
@@ -69,7 +69,7 @@ describe('Session Page', () => {
       lastUpdated: ''
     };
 
-    (useSession as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useSessionStream as ReturnType<typeof vi.fn>).mockReturnValue({
       session: mockSession,
       loading: false,
       error: null
@@ -94,7 +94,7 @@ describe('Session Page', () => {
       lastUpdated: ''
     };
 
-    (useSession as ReturnType<typeof vi.fn>).mockReturnValue({
+    (useSessionStream as ReturnType<typeof vi.fn>).mockReturnValue({
       session: mockSession,
       loading: false,
       error: null

@@ -3,6 +3,7 @@
  */
 
 import { createSession, getSession, updateSession } from './sessionManager'
+import { createSSEStream } from './streamManager'
 import type { Env } from './types'
 
 export default {
@@ -38,8 +39,14 @@ export default {
         return jsonResponse(session, 201, corsHeaders)
       }
 
+      // GET /api/session/:id/stream - SSE stream for real-time updates
+      if (path.match(/^\/api\/session\/[^/]+\/stream$/) && request.method === 'GET') {
+        const sessionId = path.split('/')[3]
+        return await createSSEStream(env.SESSIONS, sessionId)
+      }
+
       // GET /api/session/:id - Get session
-      if (path.startsWith('/api/session/') && request.method === 'GET') {
+      if (path.startsWith('/api/session/') && !path.includes('/stream') && request.method === 'GET') {
         const sessionId = path.split('/')[3]
         const session = await getSession(env.SESSIONS, sessionId)
 
